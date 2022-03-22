@@ -3,7 +3,7 @@
 
 pub mod admission;
 
-use linkerd_policy_controller_k8s_api::{self as api};
+use linkerd_policy_controller_k8s_api as api;
 use rand::Rng;
 use tracing::Instrument;
 
@@ -17,11 +17,7 @@ where
 
     let namespace = {
         // TODO(ver) include the test name in this string?
-        let rng = &mut rand::thread_rng();
-        let sfx = (0..6)
-            .map(|_| rng.sample(LowercaseAlphanumeric) as char)
-            .collect::<String>();
-        format!("linkerd-policy-test-{}", sfx)
+        format!("linkerd-policy-test-{}", random_suffix(6))
     };
 
     tracing::debug!("initializing client");
@@ -58,6 +54,13 @@ where
     if let Err(err) = res {
         std::panic::resume_unwind(err.into_panic());
     }
+}
+
+pub fn random_suffix(len: usize) -> String {
+    let rng = &mut rand::thread_rng();
+    (0..len)
+        .map(|_| rng.sample(LowercaseAlphanumeric) as char)
+        .collect()
 }
 
 fn init_tracing() -> tracing::subscriber::DefaultGuard {
